@@ -6,6 +6,8 @@ which should *seamlessly* integrate with the typical reverse shell (similar to n
 of changing between command line processes and executing custom code on the client machine (like a very similar tool, but in a lighter and jankier format).
 
 As I said before, this is a fun project for those interested in learning low level concepts, development in cybersecurity, and networking! Contributions are heavily appreciated!
+
+**IMPORTANT!!! Type 'exit' when in a shell to go back to select clients!!!!**
 # Starting Points
 - Check for dropped client connections
 - Give it some more style!
