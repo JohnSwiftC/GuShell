@@ -58,6 +58,8 @@ int openSock(void) {
 			closesocket((SOCKET)sockfd);
 			continue;
 		}
+
+		break;
 	}
 
 	// Also not sure where I got this from? I used it in my first little playground, not sure how useful this cast is.
