@@ -9,4 +9,8 @@ As I said before, this is a fun project for those interested in learning low lev
 # Starting Points
 - Check for dropped client connections
 - Give it some more style!
-  
+- Stop user from shooting themselves in the foot (they can do it a lot!)
+# Want to Learn?
+Go check out **Beej's Networking Guide!** This is a great point to start learning about sockets and networking,
+and while it might not get everything, especially on Windows, its a good spot to start!
+https://beej.us/guide/bgnet/
