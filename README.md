@@ -7,7 +7,10 @@ of changing between command line processes and executing custom code on the clie
 
 As I said before, this is a fun project for those interested in learning low level concepts, development in cybersecurity, and networking! Contributions are heavily appreciated!
 
-**IMPORTANT!!! Type 'exit' when in a shell to go back to select clients!!!!**
+**Commands**
+- clientlist > Shows connected client list
+- exit > typical command to exit most used shells like PowerShell and cmd. Others may be different or not have one at all.
+  
 # Starting Points
 - Check for dropped client connections
 - Give it some more style!
