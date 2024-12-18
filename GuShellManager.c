@@ -58,7 +58,7 @@ int openSock(void) {
 			closesocket((SOCKET)sockfd);
 			continue;
 		}
-
+		
 		break;
 	}
 
@@ -120,9 +120,12 @@ int startConversationWithClient(int remoteDesk, char * messageBuf, char * respon
 
 		// Check for exit command
 
-		if (strcmp(messageBuf, "exit") == 0) {
+		if (strcmp(messageBuf, "clientlist") == 0) {
 			memset(messageBuf, 0, messageBufSize);
 			memset(responseBuf, 0, responseBufSize);
+
+			send(remoteDesk, "0", 1, 0);
+
 			break;
 		}
 
@@ -243,6 +246,9 @@ int main(int argc, char* argv[]) {
 		// if the startConversationWithClient function so that we can still get new connections while using the shell.
 		startConversationWithClient(clientList[clientSelection - 1], messageBuf, responseBuf, (size_t)MESSAGESIZE, (size_t)RESPONSESIZE);
 	}
+
+	free(messageBuf);
+	free(responseBuf);
 
 	WSACleanup();
 
