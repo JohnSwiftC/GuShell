@@ -7,6 +7,8 @@ of changing between command line processes and executing custom code on the clie
 
 As I said before, this is a fun project for those interested in learning low level concepts, development in cybersecurity, and networking! Contributions are heavily appreciated!
 
+ * *For those in the back, GuShell.c is the victim machine, and GuShellManager.c, well, manages connections.*
+
 **Commands**
 - clientlist > Shows connected client list
 - exit > typical command to exit most used shells like PowerShell and cmd. Others may be different or not have one at all.
