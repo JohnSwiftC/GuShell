@@ -4,6 +4,7 @@ Lightweight and open source reverse shell client and connection manager built fo
 - The manager is capable of managing several connections at once via the clientlist command!
 - The shell, while built along side the manager, can likely be used with any listener with how it was made! (I have not tested this myself!)
 - Drop into and out of shells (cmd, PowerShell, etc.) of your choice, move between several on the same machine.
+- Stop Defender
 # Purpose and Usage
 This tool is built for educational purposes only, and out of my own curiousity. The only component currently included is the connection manager,
 which should *seamlessly* integrate with the typical reverse shell (similar to nc). The client, which I have not built yet, will be built with the features
@@ -14,7 +15,7 @@ As I said before, this is a fun project for those interested in learning low lev
  * *For those in the back, GuShell.c is the victim machine, and GuShellManager.c, well, manages connections.*
 
 **Commands**
-- clientlist > Shows connected client list
+- clientlist > Shows connected client list when out of shell.
 - exit > typical command to exit most used shells like PowerShell and cmd. Others may be different or not have one at all.
 # Build
 Please, please, please, use Visual Studio. That is what I used, and I personally just open a blank C++ project and smack a Source.c in there.
