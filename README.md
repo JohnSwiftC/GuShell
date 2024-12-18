@@ -20,7 +20,7 @@ As I said before, this is a fun project for those interested in learning low lev
 Please, please, please, use Visual Studio. That is what I used, and I personally just open a blank C++ project and smack a Source.c in there.
 CHECK DEFINED MACROS!!! THEY ARE IMPORTANT!!!
 
-**In Visual Studio, go to the Manifest Settings in the Linker settings! Set UAX Execution Level to either "Highest Possible" (recommended) or "Require Admin"**
+**In Visual Studio, go to the Manifest Settings in the Linker settings! Set UAC Execution Level to either "Highest Possible" (recommended) or "Require Admin"**
 This will potentially be useful when executing some commands down the line!
 # Starting Points
 - Check for dropped client connections
