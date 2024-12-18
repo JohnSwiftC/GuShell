@@ -12,7 +12,9 @@ As I said before, this is a fun project for those interested in learning low lev
 **Commands**
 - clientlist > Shows connected client list
 - exit > typical command to exit most used shells like PowerShell and cmd. Others may be different or not have one at all.
-  
+# Build
+Please, please, please, use Visual Studio. That is what I used, and I personally just open a blank C++ project and smack a Source.c in there.
+CHECK DEFINED MACROS!!! THEY ARE IMPORTANT!!!
 # Starting Points
 - Check for dropped client connections
 - Give it some more style!
