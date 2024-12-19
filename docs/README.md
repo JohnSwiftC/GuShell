@@ -17,7 +17,8 @@ Under 'Linker > Manifest', ensure that you either set the option **highestAvaila
 # Macros
 > Macros are _**VERY**_ important, do not skip this!
 There are several macros to be defined or left alone in both the manager and client, they are listed here.
-> LOCALTEST - If defined in the client, it will use the local address specified by 'ADDRESS'. If not, it will use the public facing IP provided to 'ADDRESS'.
-> ADDRESS - Is to be defined twice in the client as seen in the source file. Replace each one accordingly.
-> DEBUG_CLIENT - If defined in the client, the client will not hide its window at run time. Disabled by default.
+Macro | Description
+LOCALTEST | If defined in the client, it will use the local address specified by 'ADDRESS'. If not, it will use the public facing IP provided to 'ADDRESS'.
+ADDRESS | Is to be defined twice in the client as seen in the source file. Replace each one accordingly.
+DEBUG_CLIENT | If defined in the client, the client will not hide its window at run time. Disabled by default.
 There are other macros defined in the source, they are not crucial for operation. Ensure that if you change these, you ensure it does not harm communication.
