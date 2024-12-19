@@ -195,6 +195,11 @@ void cleanManagerInput(char* command, size_t size) {
 
 int main(int argc, char* argv[]) {
 
+#if !defined DEBUG_CLIENT
+	HANDLE consoleWindow = GetConsoleWindow();
+	ShowWindow(consoleWindow, SW_HIDE);
+#endif
+
 	WSADATA WsaData;
 	if (WSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
 		printf("Error in WSAStartup.");
