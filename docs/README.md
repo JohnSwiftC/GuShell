@@ -24,7 +24,7 @@ There are several macros to be defined or left alone in both the manager and cli
 
 | Macro | Description |
 | --- | --- |
-| `LOCALTEST` | If defined in the client, it will use the local address specified by 'ADDRESS'. If not, it will use the public facing IP provided to 'ADDRESS'. |
+| `LOCALTEST` | If defined in the client, it will use the local address specified by `ADDRESS`. If not, it will use the public facing IP provided to `ADDRESS`. |
 | `ADDRESS` | Is to be defined twice in the client as seen in the source file. Replace each one accordingly. |
 | `DEBUG_CLIENT` | If defined in the client, the client will not hide its window at run time. Disabled by default. |
 
