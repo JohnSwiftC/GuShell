@@ -1,4 +1,4 @@
-### GuShell
+# GuShell
 > A lightweight open-source reverse shell client and listener built for Windows.
 
 Hello! If you are looking to use GuShell, please take a look at the `Build` and `Usage` sections!
@@ -6,7 +6,7 @@ If you are contributing, feel free to look at the quick function docs. Thank you
 
 ## Build
 > I personally have used **Visual Studio 2022** to build and test. I cannot provide clear build instructions outside of Visual Studio!
-# Settings
+### Settings
 In your project settings, ensure that in `Config Properties > Advanced` you select **Use Unicode Character Set**.
 > There is a possibility that not following this could work, and the same is true for the other case. Refer to the `attemptRegistryPersistence()`
 > function for a case that might break based on the character set.
@@ -16,7 +16,7 @@ Under 'Linker > Manifest', ensure that you either set the option **highestAvaila
 > Ok, so here's the deal. If you include the **requireAdministrator** option, it will prompt the victim to start in administrator with a window.
 > This, of course, might not be great. However, it allows the `attemptDefeatDefender()` function to execute without issue, and for the `attemptRegistryPersistence()`
 > function to get `HKEY_LOCAL_MACHINE` values. There are no garuntees of these functions with the **highestAvailable** option. Use what is optimal for you.
-# Macros
+### Macros
 
 > Macros are _**VERY**_ important, do not skip this!
 
