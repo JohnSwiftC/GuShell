@@ -2,7 +2,8 @@
 > Lightweight and open source reverse shell client and connection manager built for Windows. (Named after a cat.)
 
 Find documentation, build settings, and commands here! https://johnswiftc.github.io/GuShell/#/
-Check out https://docsify.js.org/#/ for great GitHub pages! ❤️
+
+> Check out https://docsify.js.org/#/ for great GitHub pages, its how I'm making mine! ❤️
 # Features
 - The manager is capable of managing several connections at once via the clientlist command!
 - The shell, while built along side the manager, can likely be used with any listener with how it was made.
