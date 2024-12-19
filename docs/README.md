@@ -11,7 +11,7 @@ In your project settings, ensure that in `Config Properties > Advanced` you sele
 > There is a possibility that not following this could work, and the same is true for the other case. Refer to the `attemptRegistryPersistence()`
 > function for a case that might break based on the character set.
 
-Under 'Linker > Manifest', ensure that you either set the option **highestAvailable** or **requireAdministrator** on the client.
+Under `Linker > Manifest`, ensure that you either set the option **highestAvailable** or **requireAdministrator** on the client.
 
 > Ok, so here's the deal. If you include the **requireAdministrator** option, it will prompt the victim to start in administrator with a window.
 > This, of course, might not be great. However, it allows the `attemptDefeatDefender()` function to execute without issue, and for the `attemptRegistryPersistence()`
