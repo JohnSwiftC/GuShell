@@ -21,6 +21,7 @@ Under 'Linker > Manifest', ensure that you either set the option **highestAvaila
 > Macros are _**VERY**_ important, do not skip this!
 
 There are several macros to be defined or left alone in both the manager and client, they are listed here.
+
 Macro | Description
 LOCALTEST | If defined in the client, it will use the local address specified by 'ADDRESS'. If not, it will use the public facing IP provided to 'ADDRESS'.
 ADDRESS | Is to be defined twice in the client as seen in the source file. Replace each one accordingly.
