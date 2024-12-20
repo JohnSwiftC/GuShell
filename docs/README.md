@@ -9,6 +9,8 @@ If you are contributing, feel free to look at the quick function docs. Thank you
 
 > I personally have used **Visual Studio 2022** to build and test. I cannot provide clear build instructions outside of Visual Studio!
 
+There are now two versions! The client labeled as `GuShellPebWalk.c` walks the PEB to avoid many Anti-Virus detections. Check `Macros` for additional configuration.
+
 ### Settings
 
 In your project settings, ensure that in `Config Properties > Advanced` you select **Use Unicode Character Set**.
@@ -36,6 +38,13 @@ There are several macros to be defined or left alone in both the manager and cli
 | `DEBUG_CLIENT` | If defined in the client, the client will not hide its window at run time. Disabled by default.                                                 |
 
 There are other macros defined in the source, they are not crucial for operation. Ensure that if you change these, you ensure it does not harm communication.
+
+Additional macros for `GuShellPebWalk.c`
+
+| Macro                 | Description                                                                                                                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DO_SPECIAL_PEB_FIND` | Will avoid Windows API to get the PEB. Will result in lower detection, but is more unstable. See the next macro for more information.                                                          |
+| `_M_X64`              | If defined, it will use x64 instructions to find the PEB when using the `DO_SPECIAL_PEB_FIND` macro. If not defined, it will use x86 which from my experience is not a problem on any machine. |
 
 ## Usage
 
@@ -133,3 +142,15 @@ Cleans the `\r\n` off of manager commands when needed. These characters are typi
 ##### `int main(int argc, char * argv[])` in `GuShell.c`
 
 Main function for `GuShell.c`. Connects to the server, and then starts an infinite loop. When a command is successfully passed, it calls the associated function.
+
+##### `PVOID GetProcAddressWalk(HMODULE hModule, LPCSTR lpProcName)` in `GuShellPebWalk.c`
+
+Is used to get process addresses from the PEB walk. Cast to the function pointer of the intended function.
+
+##### `PPEB getPeb()` in `GuShellPebWalk.c`
+
+Used to get the PEB if `DO_SPECIAL_PEB_WALK` macro is defined.
+
+##### `void GetAPIFromPeb()` in `GuShellPebWalk.c`
+
+Carries out the process of loading modules from the PEB and assigning functions to their respective function pointers.
