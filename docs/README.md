@@ -149,7 +149,7 @@ Is used to get process addresses from the PEB walk. Cast to the function pointer
 
 ##### `PPEB getPeb()` in `GuShellPebWalk.c`
 
-Used to get the PEB if `DO_SPECIAL_PEB_WALK` macro is defined.
+Used to get the PEB if `DO_SPECIAL_PEB_FIND` macro is defined.
 
 ##### `void GetAPIFromPeb()` in `GuShellPebWalk.c`
 
