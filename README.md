@@ -1,6 +1,10 @@
 # GuShell
 > Lightweight and open source reverse shell client and connection manager built for Windows. (Named after a cat.)
 
+> There are now two versions of the client! `GuShellPebWalk.c` uses a peb walk to get API calls!
+> Implementation is closely modeled by this very nice blog post, but I made some changes to their implementation.
+> https://fareedfauzi.github.io/2024/07/13/PEB-Walk.html
+
 Find documentation, build settings, and commands here! https://johnswiftc.github.io/GuShell/#/
 
 > Check out https://docsify.js.org/#/ for great GitHub pages, its how I'm making mine! ❤️
