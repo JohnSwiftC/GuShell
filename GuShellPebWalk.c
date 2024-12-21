@@ -19,7 +19,7 @@
 #ifdef LOCALTEST
 #define ADDRESS "192.168.1.96"
 #else
-#define ADDRESS "75.162.112.39"
+#define ADDRESS "PUBLIC IP LOL"
 #endif
 
 #define MESSAGESIZE 10000
