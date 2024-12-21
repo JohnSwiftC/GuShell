@@ -1,3 +1,11 @@
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*'
+
+
 # Prerequisites
 *.d
 
