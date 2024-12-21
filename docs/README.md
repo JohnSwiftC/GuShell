@@ -30,12 +30,13 @@ Under `Linker > Manifest`, ensure that you either set the option **highestAvaila
 
 There are several macros to be defined or left alone in both the manager and client, they are listed here.
 
-| Macro          | Description                                                                                                                                     |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PORT`         | Port to connect over as a string.                                                                                                                           |
-| `LOCALTEST`    | If defined in the client, it will use the local address specified by `ADDRESS`. If not, it will use the public facing IP provided to `ADDRESS`. |
-| `ADDRESS`      | Is to be defined twice in the client as seen in the source file. Replace each one accordingly.                                                  |
-| `DEBUG_CLIENT` | If defined in the client, the client will not hide its window at run time. Disabled by default.                                                 |
+| Macro           | Description                                                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`          | Port to connect over.                                                                                                                           |
+| `LOCALTEST`     | If defined in the client, it will use the local address specified by `ADDRESS`. If not, it will use the public facing IP provided to `ADDRESS`. |
+| `ADDRESS`       | Is to be defined twice in the client as seen in the source file. Replace each one accordingly.                                                  |
+| `DEBUG_CLIENT`  | If defined in the client, the client will not hide its window at run time. Disabled by default.                                                 |
+| `GO_FOR_THROAT` | If defined, will automatically go for reg keys and file move on run. Enabled by default.                                                        |
 
 There are other macros defined in the source, they are not crucial for operation. Ensure that if you change these, you ensure it does not harm communication.
 
@@ -70,10 +71,13 @@ Additional macros for `GuShellPebWalk.c`
 | Drop Into Shell                | Creates a shell process on the victim machine that you can talk to. you will be prompted to then type the name of the shell process such as `cmd` or `powershell`. GuShell resumes normal communication after this process is killed by the user, see `startShellProcess`. |
 | Attempt Defeat Defender\*      | Attempts to place a Regestry key `DisableAntiSpyware` to permanently disable Windows Defender. May fail due to low elevation.                                                                                                                                              |
 | Attempt Registry Persistence\* | Attempts to place auto-start values in both the `HKEY_LOCAL_MACHINE` and `HKEY_CURRENT_USER` registry trees. One or both may fail due to low elevation.                                                                                                                    |
+| Attempt Full Persistence       | Attempts to move the file away from user view, and then calls `attemptRegistryPersistence`.                                                                                                                                                                                |
 
 ## Function Reference
 
 > All functions are either included in `GuShell.c` or `GuShellManager.c`, sometimes with additional commenting.
+
+> All functions included in `GuShell.c` are also present in `GuShellPebWalk.c`. `GuShellPebWalk.c` is an extension of normal functionality.
 
 ##### `int openSock(void)` in `GuShellManager.c`
 
@@ -143,13 +147,21 @@ Cleans the `\r\n` off of manager commands when needed. These characters are typi
 
 Main function for `GuShell.c`. Connects to the server, and then starts an infinite loop. When a command is successfully passed, it calls the associated function.
 
+##### `void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName)` in `GuShell.c`
+
+Attempts to place the client into the `AppData/Roaming` directory. Then places a registry autostart on the new value.
+
+##### `void attemptFullPersistenceNoNetwork(TCHAR* dirName)` in `GuShell.c`
+
+Is a version of `attemptFullPersistence` with no network calls. Is intended for the `GO_FOR_THROAT` macro, which will likely not have a host connection.
+
 ##### `PVOID GetProcAddressWalk(HMODULE hModule, LPCSTR lpProcName)` in `GuShellPebWalk.c`
 
 Is used to get process addresses from the PEB walk. Cast to the function pointer of the intended function.
 
 ##### `PPEB getPeb()` in `GuShellPebWalk.c`
 
-Used to get the PEB if `DO_SPECIAL_PEB_FIND` macro is defined.
+Used to get the PEB if `DO_SPECIAL_PEB_WALK` macro is defined.
 
 ##### `void GetAPIFromPeb()` in `GuShellPebWalk.c`
 
