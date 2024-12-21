@@ -1,4 +1,7 @@
 # GuShell
+
+**All source files can be found in `GuShellClient`.**
+
 UPDATE: Finally easy to build! Just clone and build solution as Release, quick video for those confused soon. Also, a problem with the manager was fixed. It now works even when compiled with compiler optimizations! (On by default)
 > Lightweight and open source reverse shell client and connection manager built for Windows. (Named after a cat.)
 
