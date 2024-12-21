@@ -553,7 +553,7 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(commandOpt, "4") == 0) {
-			attemptFullPersistence();
+			attemptFullPersistence(&sockfd, dirName);
 			continue;
 		}
 
