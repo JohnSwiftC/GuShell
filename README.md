@@ -1,6 +1,5 @@
 # GuShell
-**HUGE NOTE:** I CURRENTLY RECOMMEND THE PEBWALK VERSION FOR USE. I LOWKEY HAVE NOT TESTED THE OTHER ONE WITH NEW FEATURES. IT WORKS I PROMISE PROBABLY. (Will make stable branch soon.)
-
+UPDATE: Finally easy to build! Just clone and build solution as Release, quick video for those confused soon. Also, a problem with the manager was fixed. It now works even when compiled with compiler optimizations! (On by default)
 > Lightweight and open source reverse shell client and connection manager built for Windows. (Named after a cat.)
 
 > There are now two versions of the client! `GuShellPebWalk.c` uses a peb walk to get API calls!
@@ -16,6 +15,7 @@ Find documentation, build settings, and commands here! https://johnswiftc.github
 - Drop into and out of shells (cmd, PowerShell, etc.) of your choice, move between several on the same machine.
 - Stop Defender.
 - Persistence in Registry Autostart.
+- Persistence in AppData files
 # Want to Learn?
 Go check out **Beej's Networking Guide!** This is a great point to start learning about sockets and networking,
 and while it might not get everything, especially on Windows, its a good spot to start!
