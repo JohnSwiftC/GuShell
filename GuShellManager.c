@@ -9,7 +9,7 @@
 #include <process.h>
 
 
-#define PORT "5000"
+#define PORT "3000"
 
 #define MESSAGESIZE 10000
 #define RESPONSESIZE 20000
@@ -23,6 +23,7 @@ int acceptClientOnSock(int sockfd);
 int startConversationWithClient(int remoteDesk, char* messageBuf, char* responseBuf, size_t messageBufSize, size_t responseBufSize);
 void handleNewConnectionProc(void* pID);
 void printWelcomeMessage();
+
 
 // These need to be top level for easy threading. DO NOT CHANGE AFTER STARTING NEW THREADS UNLESS BLOCKED AND ACTUALLY PLANNED OUT
 HANDLE hClientListMutex;
@@ -173,15 +174,15 @@ void handleNewConnectionProc(void* arg) {
 	return;
 }
 
-// One million style points
 void printWelcomeMessage() {
-    printf("  _._     _,-'""`-._\n");
-    printf(" (,-.`._,'(       |\\`-/|\n");
-    printf("    `-.-' \\ )-`( , o o)\n");
-    printf("          `-    \\`_`\"'-\n\n");
-    printf("GuShell Manager - Lightweight and open source reverse shell manager\n");
-    printf("Developed by JohnSwiftC\n\n");
+	printf("  _._     _,-'""`-._\n");
+	printf(" (,-.`._,'(       |\\`-/|\n");
+	printf("    `-.-' \\ )-`( , o o)\n");
+	printf("          `-    \\`_`\"'-\n\n");
+	printf("GuShell Manager - Lightweight and open source reverse shell manager\n");
+	printf("Developed by JohnSwiftC\n\n");
 }
+
 
 int main(int argc, char* argv[]) {
 
