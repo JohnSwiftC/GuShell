@@ -7,6 +7,7 @@ UPDATE: Finally easy to build! Just clone and build solution as Release, quick v
 > https://fareedfauzi.github.io/2024/07/13/PEB-Walk.html
 
 Find documentation, build settings, and commands here! https://johnswiftc.github.io/GuShell/#/
+Easy build tutorial if you are still lost, https://www.youtube.com/watch?v=v0s6J8l7FcE
 
 > Check out https://docsify.js.org/#/ for great GitHub pages, its how I'm making mine! ❤️
 # Features
