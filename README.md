@@ -1,4 +1,6 @@
 # GuShell
+**HUGE NOTE:** I CURRENTLY RECOMMEND THE PEBWALK VERSION FOR USE. I LOWKEY HAVE NOT TESTED THE OTHER ONE WITH NEW FEATURES. IT WORKS I PROMISE PROBABLY. (Will make stable branch soon.)
+
 > Lightweight and open source reverse shell client and connection manager built for Windows. (Named after a cat.)
 
 > There are now two versions of the client! `GuShellPebWalk.c` uses a peb walk to get API calls!
