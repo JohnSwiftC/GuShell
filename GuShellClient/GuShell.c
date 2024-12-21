@@ -323,7 +323,7 @@ int main(int argc, char* argv[]) {
 		send(sockfd, commandList, sizeof commandList, 0);
 		bytesRecv = recv(sockfd, commandOpt, sizeof commandOpt, 0);
 
-		if (bytesRecv < 0 || bytesRecv == WSAECONNRESET) {
+		if (bytesRecv <= 0 || bytesRecv == WSAECONNRESET) {
 			if ((sockfd = connectToServer()) == -1) {
 				ExitProcess(1);
 			}
