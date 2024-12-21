@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <process.h>
 #include <sys/types.h>
+#include <ShlObj.h>
 
 
 #define PORT "5000"
