@@ -1,4 +1,0 @@
-﻿  Source.c
-C:\Users\johns\source\repos\GuShellClient\GuShellClient\Source.c(55,38): warning C4267: 'function': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\johns\source\repos\GuShellClient\GuShellClient\Source.c(87,78): warning C4133: 'function': incompatible types - from 'STARTUPINFO *' to 'LPSTARTUPINFOA'
-  GuShellClient.vcxproj -> C:\Users\johns\source\repos\GuShellClient\x64\Debug\GuShellClient.exe
