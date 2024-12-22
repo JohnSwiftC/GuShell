@@ -24,8 +24,6 @@ int startConversationWithClient(int remoteDesk, char* messageBuf, char* response
 void handleNewConnectionProc(void* pID);
 void printWelcomeMessage();
 
-// Here is my new comment!
-
 // These need to be top level for easy threading. DO NOT CHANGE AFTER STARTING NEW THREADS UNLESS BLOCKED AND ACTUALLY PLANNED OUT
 HANDLE hClientListMutex;
 volatile int clientList[CLIENTAMOUNT] = { NULL };
