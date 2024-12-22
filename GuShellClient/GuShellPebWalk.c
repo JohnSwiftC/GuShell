@@ -554,7 +554,7 @@ int main(int argc, char* argv[]) {
 		bytesRecv = pRecv(sockfd, commandOpt, sizeof commandOpt, 0);
 
 		// Check for dc
-		if (bytesRecv <= 0 || bytesRecv == WSAECONNRESET) {
+		if (bytesRecv < 0 || bytesRecv == WSAECONNRESET) {
 			if ((sockfd = connectToServer()) == -1) {
 				ExitProcess(1);
 			}
