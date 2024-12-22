@@ -251,13 +251,9 @@ int main(int argc, char* argv[]) {
 		gets_s(commandBuf, sizeof commandBuf);
 		clientSelection = atoi(commandBuf);
 
-		WaitForSingleObject(hClientListMutex, INFINITE);
-
 		if (clientSelection == 0 || clientSelection > clientCount) {
 			continue;
 		}
-
-		ReleaseMutex(hClientListMutex);
 
 		WaitForSingleObject(hClientListMutex, INFINITE);
 
