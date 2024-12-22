@@ -260,6 +260,7 @@ void GetAPIFromPeb() {
 
 		if (shell32Base == NULL) shell32Base = pLoadLibraryA("Shell32.dll");
 
+		pSHGetFolderPath = (SHGETFOLDERPATH)GetProcAddressWalk(shell32Base, "SHGetFolderPath");
 	}
 }
 
