@@ -514,7 +514,7 @@ int main(int argc, char* argv[]) {
 	WSADATA WsaData;
 	if (pWSAStartup(MAKEWORD(2, 2), &WsaData) != 0) {
 		printf("Error in WSAStartup.");
-		ExitProcess(1);
+		return 1;
 	}
 
 	SOCKET sockfd;
@@ -537,7 +537,7 @@ int main(int argc, char* argv[]) {
 	int bytesRecv;
 
 	if ((sockfd = connectToServer()) == -1) {
-		ExitProcess(1);
+		return 1;
 	}
 
 	while (1) {
