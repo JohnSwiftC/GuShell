@@ -57,10 +57,11 @@ Additional macros for `GuShellPebWalk.c`
 
 > These commands must be typed out.
 
-| Command        | Description                                                                                                                                                                        |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| clientlist\*\* | Returns user to the list of active clients.                                                                                                                                        |
-| exit           | This command is not from GuShell, rather it is the command to terminate a shell process. GuShell is checking whether a process has been closed before it "pulls out" of the shell. |
+| Command              | Description                                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| clientlist\*\*       | Returns user to the list of active clients.                                                                                                                                        |
+| exit                 | This command is not from GuShell, rather it is the command to terminate a shell process. GuShell is checking whether a process has been closed before it "pulls out" of the shell. |
+| disconnect or dc\*\* | Will disconnect from a client in conversation. To be used if client has stopped responding or is not GuShell. Dynamically opens room for new clients.                              |
 
 ### Utility Commands
 
