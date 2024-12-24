@@ -20,6 +20,9 @@ Easy build tutorial if you are still lost, https://www.youtube.com/watch?v=v0s6J
 - Stop Defender.
 - Persistence in Registry Autostart.
 - Persistence in AppData files
+
+# Warning!
+This repo is for cybersecurity education only! I am making this out of interest in network programming, low level programming, malware reverse engineering and general cybersecurity! I am not liable for people who attempt to use this tool outside of what I have made it for. Thank you!
 # Want to Learn?
 Go check out **Beej's Networking Guide!** This is a great point to start learning about sockets and networking,
 and while it might not get everything, especially on Windows, its a good spot to start!
