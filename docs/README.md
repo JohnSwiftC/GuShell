@@ -73,12 +73,15 @@ Additional macros for `GuShellPebWalk.c`
 | Attempt Defeat Defender\*      | Attempts to place a Regestry key `DisableAntiSpyware` to permanently disable Windows Defender. May fail due to low elevation.                                                                                                                                              |
 | Attempt Registry Persistence\* | Attempts to place auto-start values in both the `HKEY_LOCAL_MACHINE` and `HKEY_CURRENT_USER` registry trees. One or both may fail due to low elevation.                                                                                                                    |
 | Attempt Full Persistence       | Attempts to move the file away from user view, and then calls `attemptRegistryPersistence`.                                                                                                                                                                                |
+| Attempt UAC Bypass\*           | Attempts UAC bypass with fodhelper.exe, high success rate. [Article About This Technique](https://johnswiftc.github.io/cybersecurity/maldev/networking/2024/12/28/fodhelper.html)                                                                                          |
 
 ## Function Reference
 
 > All functions are either included in `GuShell.c` or `GuShellManager.c`, sometimes with additional commenting.
 
 > All functions included in `GuShell.c` are also present in `GuShellPebWalk.c`. `GuShellPebWalk.c` is an extension of normal functionality.
+
+> wchar_t \* `dirName` appears as a commonly used variable throughout the source code. It represents the current absolute path of the client. If the client is moved, this **MUST** be updated accordingly.
 
 ##### `int openSock(void)` in `GuShellManager.c`
 
@@ -155,6 +158,11 @@ Attempts to place the client into the `AppData/Roaming` directory. Then places a
 ##### `void attemptFullPersistenceNoNetwork(TCHAR* dirName)` in `GuShell.c`
 
 Is a version of `attemptFullPersistence` with no network calls. Is intended for the `GO_FOR_THROAT` macro, which will likely not have a host connection.
+
+##### `void bypassUACWithFod(TCHAR* dirName)` in `GuShell.c`
+
+Attempts a UAC bypass with fodhelper.exe. It utilizes a dummy powershel script to carry out the elevation. During the short period of time where the new GuShell is started, it will notice the command line
+args passed to it and then start itself _again_ before it is killed by Defender. The final instance will be a high-integrity process that is maintained. [Article](https://johnswiftc.github.io/cybersecurity/maldev/networking/2024/12/28/fodhelper.html)
 
 ##### `PVOID GetProcAddressWalk(HMODULE hModule, LPCSTR lpProcName)` in `GuShellPebWalk.c`
 
