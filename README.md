@@ -1,5 +1,7 @@
 # GuShell
 
+**LATEST UPDATE: UAC Bypass!**
+
 **All source files can be found in `GuShellClient`.**
 
 UPDATE: Finally easy to build! Just clone and build solution as Release, look at video linked below. Also, a problem with the manager was fixed. It now works even when compiled with compiler optimizations! (On by default)
@@ -20,6 +22,7 @@ Easy build tutorial if you are still lost, https://www.youtube.com/watch?v=v0s6J
 - Stop Defender.
 - Persistence in Registry Autostart.
 - Persistence in AppData files
+- UAC Bypass.
 
 # Warning!
 This repo is for cybersecurity education only! I am making this out of interest in network programming, low level programming, malware reverse engineering and general cybersecurity! I am not liable for people who attempt to use this tool outside of what I have made it for. Thank you!
@@ -27,3 +30,5 @@ This repo is for cybersecurity education only! I am making this out of interest 
 Go check out **Beej's Networking Guide!** This is a great point to start learning about sockets and networking,
 and while it might not get everything, especially on Windows, its a good spot to start!
 https://beej.us/guide/bgnet/
+
+Also, I have a [blog](https://johnswiftc.github.io/) to yap in when I get bored now.
