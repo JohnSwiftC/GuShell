@@ -15,7 +15,7 @@
 
 #define PORT "3000"
 
-#define DEBUG_CLIENT
+//#define DEBUG_CLIENT
 
 // #define _M_X64 // for peb
 #define DO_SPECIAL_PEB_FIND

